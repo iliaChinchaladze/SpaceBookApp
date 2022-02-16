@@ -17,9 +17,9 @@ class todo extends Component{
     return (
       <View style={styles.container}>
       <NavigationContainer >
-        <Stack.Navigator initialRouteName="loginPage" screenOptions={{headerShown: false }} >
-        <Stack.Screen name="Login" component={Login}/>
-         <Stack.Screen name="signupPage" component={Signup}/>
+        <Stack.Navigator initialRouteName="loginPage"  >
+        <Stack.Screen name="Login" component={Login} screenOptions={{headerShown: false }}/>
+         <Stack.Screen name="signupPage" component={Signup}  />
          <Stack.Screen name="mainPage" component={MainP}/>
         </Stack.Navigator>
       </NavigationContainer>

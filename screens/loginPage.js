@@ -27,16 +27,17 @@ class Login extends Component{
         secureTextEntry={true}
         onChangeText={(text)=>{this.setState({password:text})}}
         />
- 
-        <Button style={styles.button}
-          title="Log in"
-          //onPress={() => this.props.navigation.navigate('mainPage')}
-          onPress={()=>{this.login()}}
-        />
-        <Button style={styles.button}
-          title="Sign up"
-          onPress={() => this.props.navigation.navigate('signupPage')}
-        />
+        <View style={{justifyContent: 'space-between',margin:20}}>
+            <Button style={styles.button}
+              title="Log in"
+              onPress={()=>{this.login()}}
+            />
+            <Text style={{alignSelf:"center"}} >or</Text>
+            <Button style={styles.button}
+              title="Sign up"
+              onPress={() => this.props.navigation.navigate('signupPage')}
+            />
+        </View>
       </View>       
     );
   }
