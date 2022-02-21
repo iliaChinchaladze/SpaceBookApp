@@ -6,26 +6,40 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import Login from './screens/loginPage';
 import Signup from './screens/signupPage';
-import MainP from './screens/mainPage';
+import Home from './screens/Home';
+import CameraP from './screens/cameraPage';
+
+import CameraIcon from './assets/cameraIcon.png';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-class todo extends Component{
+function HomeScreenNav(){
+  return(
+      <Tab.Navigator 
+      initialRouteName='Home'>
+        <Tab.Screen name="Home" component={Home} screenOptions={{headerShown: false }}/>
+        <Tab.Screen name="cameraPage" component={CameraP}  screenOptions={{headerLeft:()=><CameraIcon/>}}/>
+      </Tab.Navigator>
+  )
+}
 
+class todo extends Component{
   render() {
     return (
       <View style={styles.container}>
       <NavigationContainer >
         <Stack.Navigator initialRouteName="loginPage"  >
-        <Stack.Screen name="Login" component={Login} screenOptions={{headerShown: false }}/>
-         <Stack.Screen name="signupPage" component={Signup}  />
-         <Stack.Screen name="mainPage" component={MainP}/>
-        </Stack.Navigator>
+          <Stack.Screen name="Login" component={Login} screenOptions={{headerShown: false }}/>
+          <Stack.Screen name="signupPage" component={Signup}  />
+          <Stack.Screen name="Home" component={HomeScreenNav}/>
+        </Stack.Navigator>    
       </NavigationContainer>
       </View>
     );
   }
+
+  
 
 
 }

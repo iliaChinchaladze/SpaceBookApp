@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Button,  TextInput, Alert, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Login extends Component{
   constructor(props){
@@ -43,8 +44,8 @@ class Login extends Component{
   }
 
   login = async() =>{
-    return fetch("http://localhost:3333/api/1.0.0/login", {
-     method:"post",
+    return fetch("http://10.0.2.2:3333/api/1.0.0/login", {
+     method:"POST",
      headers:{"Content-Type":"application/json"},
      body: JSON.stringify({
        email: this.state.email,
@@ -63,7 +64,7 @@ class Login extends Component{
     .then(async (responseJson) => {
       console.log(responseJson);
       await AsyncStorage.setItem('@session_token', responseJson.token);
-      this.props.navigation.navigate("mainPage");
+      this.props.navigation.navigate("Home");
     })
     .catch((error) => {
       console.log(error);
