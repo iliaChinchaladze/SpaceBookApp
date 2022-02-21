@@ -8,7 +8,7 @@ import Login from './screens/loginPage';
 import Signup from './screens/signupPage';
 import Home from './screens/Home';
 import CameraP from './screens/cameraPage';
-
+import Post from './screens/PostPage';
 import CameraIcon from './assets/cameraIcon.png';
 
 const Stack = createNativeStackNavigator();
@@ -16,10 +16,10 @@ const Tab = createBottomTabNavigator();
 
 function HomeScreenNav(){
   return(
-      <Tab.Navigator 
-      initialRouteName='Home'>
-        <Tab.Screen name="Home" component={Home} screenOptions={{headerShown: false }}/>
-        <Tab.Screen name="cameraPage" component={CameraP}  screenOptions={{headerLeft:()=><CameraIcon/>}}/>
+      <Tab.Navigator screenOptions={{ headerShown: false }} >
+        <Tab.Screen name="Home" component={Home} />
+        <Tab.Screen name="cameraPage" component={CameraP} />
+        <Tab.Screen name="Post" component={Post} />
       </Tab.Navigator>
   )
 }
@@ -30,7 +30,7 @@ class todo extends Component{
       <View style={styles.container}>
       <NavigationContainer >
         <Stack.Navigator initialRouteName="loginPage"  >
-          <Stack.Screen name="Login" component={Login} screenOptions={{headerShown: false }}/>
+          <Stack.Screen name="Login" component={Login}  />
           <Stack.Screen name="signupPage" component={Signup}  />
           <Stack.Screen name="Home" component={HomeScreenNav}/>
         </Stack.Navigator>    

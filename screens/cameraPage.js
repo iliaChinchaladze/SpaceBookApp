@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Camera } from 'expo-camera';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class CameraPage extends Component{
   constructor(props){
@@ -19,8 +20,8 @@ class CameraPage extends Component{
 
   sendToServer = async (data) => {
     // Get these from AsyncStorage
-    let id = 10;
-    let token = "a3b0601e54775e60b01664b1a5273d54"
+    let id = await AsyncStorage.getItem("@session_id");
+    let token = await AsyncStorage.getItem("@session_token");
 
     let res = await fetch(data.base64);
     let blob = await res.blob();

@@ -62,7 +62,10 @@ class Login extends Component{
       }
     })
     .then(async (responseJson) => {
+      
+      let id = JSON.stringify(responseJson.id);
       console.log(responseJson);
+      await AsyncStorage.setItem('@session_id', id);
       await AsyncStorage.setItem('@session_token', responseJson.token);
       this.props.navigation.navigate("Home");
     })
@@ -77,10 +80,16 @@ const styles = StyleSheet.create({
     margin:30
   },
   input:{
+    width: 300,
     height: 40,
-    margin: 20,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderColor: '#ccc',
     borderWidth: 1,
-    padding: 10,
+    borderRadius: 15, 
+    fontSize: 16,
+    alignSelf:"center"
   },
   button:{
     margin:10,
