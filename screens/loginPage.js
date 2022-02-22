@@ -7,7 +7,8 @@ class Login extends Component{
     super(props);
     this.state = {
       email: "",
-      password:""
+      password:"",
+      postLink: "http://10.0.2.2:3333/api/1.0.0"
     }
   }
   render(){
@@ -44,7 +45,7 @@ class Login extends Component{
   }
 
   login = async() =>{
-    return fetch("http://10.0.2.2:3333/api/1.0.0/login", {
+    return fetch(this.state.postLink+"/login", {
      method:"POST",
      headers:{"Content-Type":"application/json"},
      body: JSON.stringify({
@@ -67,7 +68,7 @@ class Login extends Component{
       console.log(responseJson);
       await AsyncStorage.setItem('@session_id', id);
       await AsyncStorage.setItem('@session_token', responseJson.token);
-      this.props.navigation.navigate("Home");
+      this.props.navigation.navigate("Main");
     })
     .catch((error) => {
       console.log(error);
@@ -77,7 +78,10 @@ class Login extends Component{
 
 const styles = StyleSheet.create({
   container:{
-    margin:30
+    margin:30,
+    alignSelf:"center",
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   input:{
     width: 300,
@@ -89,13 +93,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15, 
     fontSize: 16,
-    alignSelf:"center"
+    alignSelf:"center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10
   },
   button:{
     margin:10,
     marginVertical:20,
-    
-  },
+  }
 });
 
 export default Login;

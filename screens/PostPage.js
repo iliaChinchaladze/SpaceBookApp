@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View,TextInput, Alert} from 'react-native';
+import { StyleSheet, Text, View,TextInput, Alert, SafeAreaView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native';
 
@@ -9,12 +9,13 @@ class PostPage extends Component{
   
       this.state = {
           id:'',
-          post:""
+          post:"",
+          postLink: "http://10.0.2.2:3333/api/1.0.0"
       }  
   }
   render(){
       return(
-        <View>
+        <SafeAreaView>
             <TextInput
             style={styles.input}
             placeholder="What's on your mind?"
@@ -25,7 +26,7 @@ class PostPage extends Component{
             style={styles.button}>
                 <Text>Post</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
       );
   }
 
@@ -36,7 +37,7 @@ class PostPage extends Component{
       let to_send ={
         text:this.state.post
       }
-      return fetch("http://10.0.2.2:3333/api/1.0.0/user/"+ id + "/post", {
+      return fetch(this.state.postLink+"/user/"+ id + "/post", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
