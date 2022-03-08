@@ -8,7 +8,7 @@ class Login extends Component{
     this.state = {
       email: "",
       password:"",
-      postLink: "http://10.0.2.2:3333/api/1.0.0"
+      postLink: "http://localhost:3333/api/1.0.0"
     }
   }
   render(){
@@ -58,6 +58,8 @@ class Login extends Component{
         return response.json()
       }else if(response.status === 400){
         throw 'Invalid email or password';
+      }else if(response.status === 500){
+        throw 'Server Error';
       }else{
         throw 'Something went wrong';
       }

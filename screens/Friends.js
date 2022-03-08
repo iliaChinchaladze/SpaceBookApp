@@ -40,7 +40,7 @@ class Friends extends Component {
   addFriend = async(id)=>{
     const value = await AsyncStorage.getItem('@session_token');
     
-    return fetch("http://localhost:3333/api/1.0.0/user/"+id+"/friends",{
+    return fetch(this.state.postLink+"/user/"+id+"/friends",{
       method:"POST",
       'headers': {
         'X-Authorization':  value
@@ -48,11 +48,15 @@ class Friends extends Component {
     })
     .then((response) => {
       if(response.status === 201){
-          console.log('Friend added')
+          console.log('Friend Request Sent')
       }else if(response.status === 401){
         this.props.navigation.navigate("Login");
       }else if(response.status === 403){
         console.log("User already added");
+      }else if(response.status === 404){
+        throw'Not found'
+      }else if(response.status === 500){
+        throw"Server Error"
       }else{
           throw 'Something went wrong';
       }
@@ -66,19 +70,22 @@ class Friends extends Component {
     const value = await AsyncStorage.getItem('@session_token');
     let id = await AsyncStorage.getItem('@session_id');
 
-    return fetch("http://localhost:3333/api/1.0.0/user/"+id+"/friends",{
+    return fetch(this.state.postLink+"/user/"+id+"/friends",{
       'headers': {
         'X-Authorization':  value
       }
     })
     .then((response) => {
-      if(response.status === 200){
-
-
-        
+      if(response.status === 200){   
           return response.json()
       }else if(response.status === 401){
         this.props.navigation.navigate("Login");
+      }else if(response.status === 403){
+        throw'Can only view the friends of yourself or your friends'
+      }else if(response.status === 404){
+        throw'Not Found'
+      }else if(response.status === 500){
+        throw'Server Error'
       }else{
           throw 'Something went wrong';
       }
@@ -99,7 +106,7 @@ class Friends extends Component {
   acceptRequest = async(id)=>{
     const value = await AsyncStorage.getItem('@session_token');
 
-    return fetch("http://localhost:3333/api/1.0.0/friendrequests/"+id,{
+    return fetch(this.state.postLink+"/friendrequests/"+id,{
       method: 'POST',
       'headers': {
         'X-Authorization':  value
@@ -110,8 +117,11 @@ class Friends extends Component {
           console.log('Friend added')
       }else if(response.status === 401){
         this.props.navigation.navigate("Login");
+      }else if(response.status === 404){
+        throw 'Not Found'
       }else if(response.status === 500){
-        throw 'Server error';}else{
+        throw 'Server error';
+      }else{
           throw 'Something went wrong';
       }
     })
@@ -132,7 +142,7 @@ class Friends extends Component {
   deleteRequest = async(id)=>{
     const value = await AsyncStorage.getItem('@session_token');
 
-    return fetch("http://localhost:3333/api/1.0.0/friendrequests/"+id,{
+    return fetch(this.state.postLink+"/friendrequests/"+id,{
       method: 'DELETE',
       'headers': {
         'X-Authorization':  value
@@ -167,7 +177,7 @@ class Friends extends Component {
   getData = async () => {
     const value = await AsyncStorage.getItem('@session_token');
     let query = this.state.query;
-    return fetch("http://localhost:3333/api/1.0.0/search/?q="+query, {
+    return fetch(this.state.postLink+"/search/?q="+query, {
           'headers': {
             'X-Authorization':  value
           }
@@ -177,6 +187,10 @@ class Friends extends Component {
                 return response.json()
             }else if(response.status === 401){
               this.props.navigation.navigate("Login");
+            }else if(response.status === 400){
+              throw'Bad Request'
+            }else if(response.status === 500){
+              throw'Server Error'
             }else{
                 throw 'Something went wrong';
             }
@@ -194,7 +208,7 @@ class Friends extends Component {
 
   friendRequests = async()=>{
     const value = await AsyncStorage.getItem('@session_token');
-    return fetch("http://localhost:3333/api/1.0.0/friendrequests",{
+    return fetch(this.state.postLink+"/friendrequests",{
       'headers': {
         'X-Authorization':  value
       }
@@ -204,6 +218,8 @@ class Friends extends Component {
           return response.json()
       }else if(response.status === 401){
         this.props.navigation.navigate("Login");
+      }else if(response.status === 500){
+        throw'Server Error'
       }else{
           throw 'Something went wrong';
       }
@@ -245,6 +261,8 @@ class Friends extends Component {
       return (
         <ImageBackground source={SpaceBackgr} resizeMode="cover" style={styles.image}>
         <View>
+        <h3 style={{backgroundColor:'rgba(25,118,211,0.8)', borderRadius:10, 
+              width:"50%",fontFamily: 'italic', fontSize:18, textAlign:'center', alignSelf:'center' }}>Friends</h3>
               <FlatList
                     style={styles.FriendFound}
                     data={this.state.friendsList}
@@ -261,7 +279,8 @@ class Friends extends Component {
                     )}
                     keyExtractor={(item,index) => item.user_id.toString()}
                   />
-
+        <h3 style={{backgroundColor:'rgba(25,118,211,0.8)', borderRadius:10, 
+              width:"50%",fontFamily: 'italic', fontSize:18, textAlign:'center', alignSelf:'center' }}>Users</h3>
               <FlatList
                     style={styles.FriendFound}
                     data={this.state.listData}
@@ -294,7 +313,9 @@ class Friends extends Component {
               style={styles.button}>
                   <Text>Find</Text>
               </TouchableOpacity>    
-
+              
+              <h3 style={{backgroundColor:'rgba(25,118,211,0.8)', borderRadius:10, 
+              width:"50%",fontFamily: 'italic', fontSize:18, textAlign:'center', alignSelf:'center' }}>Friend Requests</h3>
               <FlatList
                     style={styles.FriendFound}
                     data={this.state.requestList}

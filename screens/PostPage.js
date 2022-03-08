@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View,TextInput, Alert, SafeAreaView} from 'react-native';
+import { StyleSheet, Text, View,TextInput, Alert, SafeAreaView, ImageBackground} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from 'react-native';
+
+import SpaceBackgr from './logo/spacePic.JPG';
 
 class PostPage extends Component{
     constructor(props){
@@ -10,23 +12,27 @@ class PostPage extends Component{
       this.state = {
           id:'',
           post:"",
-          postLink: "http://10.0.2.2:3333/api/1.0.0"
+          postLink: "http://localhost:3333/api/1.0.0"
       }  
   }
   render(){
       return(
-        <SafeAreaView>
-            <TextInput
-            style={styles.input}
-            placeholder="What's on your mind?"
-            onChangeText={(text)=>{this.setState({post:text})}}
-            />
-            <TouchableOpacity 
-            onPress={()=>{this.addPost()}}
-            style={styles.button}>
-                <Text>Post</Text>
-            </TouchableOpacity>
-        </SafeAreaView>
+        <ImageBackground source={SpaceBackgr} resizeMode="cover" style={styles.image}>
+          <SafeAreaView style={styles.SafeAreaViewStyle}>
+            
+              <TextInput
+              style={styles.input}
+              multiline = "true"
+              placeholder="What's on your mind?"
+              onChangeText={(text)=>{this.setState({post:text})}}
+              />
+              <TouchableOpacity 
+              onPress={()=>{this.addPost()}}
+              style={styles.button}>
+                  <Text>Post</Text>
+              </TouchableOpacity>          
+          </SafeAreaView>
+        </ImageBackground>
       );
   }
 
@@ -46,8 +52,20 @@ class PostPage extends Component{
         body: JSON.stringify(to_send)
       })
       .then((response) => {
-        Alert.alert("Post added");
-        this.props.navigation.navigate("Home");
+        
+        if(response.status === 201){
+          Alert.alert("Post added");
+          this.props.navigation.navigate("Home");
+        }  
+        else if (response.status === 401){
+          throw 'Unauthorised' 
+        }else if (response.status === 404){
+          throw 'Not Found' 
+        }else if (response.status === 500){
+          throw 'Server Error' 
+        }else{
+          throw'Something went wrong'
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -59,7 +77,7 @@ class PostPage extends Component{
 const styles = StyleSheet.create({
     input: {
         width: 300,
-        height: 40,
+        height: 90,
         backgroundColor: '#fff',
         paddingVertical: 10,
         paddingHorizontal: 15,
@@ -67,7 +85,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 15, 
         fontSize: 16,
-        alignSelf:"center"
+        alignSelf:"center",
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        marginBottom:5,
+        shadowRadius:20
     },
     button: {
         width: 50,
@@ -75,9 +96,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 10,
-        borderRadius: 100,
+        borderRadius: 20,
         alignSelf:"center",
         backgroundColor: "#61DBFB",
+    },
+    image: {
+      flex: 1,
+      justifyContent: "center"
+    },
+    SafeAreaViewStyle:{
+      alignItems: 'center',
+      alignContent: 'center',
+      alignSelf:'center',
     }
   });
 export default PostPage;

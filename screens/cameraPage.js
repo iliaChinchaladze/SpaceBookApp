@@ -9,7 +9,8 @@ class CameraPage extends Component{
 
     this.state = {
       hasPermission: null,
-      type: Camera.Constants.Type.back
+      type: Camera.Constants.Type.back,
+      postLink: "http://localhost:3333/api/1.0.0",
     }
   }
 
@@ -26,7 +27,7 @@ class CameraPage extends Component{
     let res = await fetch(data.base64);
     let blob = await res.blob();
 
-    return fetch("http://10.0.2.2:3333/api/1.0.0/user/" + id + "/photo", {
+    return fetch(this.state.postLink+"/user/" + id + "/photo", {
         method: "POST",
         headers: {
             "Content-Type": "image/png",

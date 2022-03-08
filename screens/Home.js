@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
-import {View, Text, FlatList,TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, FlatList,TouchableOpacity, StyleSheet, ImageBackground} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Button, ButtonGroup, Avatar} from '@mui/material';
+
+import SpaceBackgr from './logo/spacePic.JPG';
 
 class Home extends Component {
   constructor(props){
@@ -12,7 +15,9 @@ class Home extends Component {
       postData:[],
       liked: [],
       postID:[],
-      postLink: "http://10.0.2.2:3333/api/1.0.0"
+      userDetails:[],
+      photo: null,
+      postLink: "http://localhost:3333/api/1.0.0"
     }
   }
 
@@ -20,19 +25,52 @@ class Home extends Component {
     this.unsubscribe = this.props.navigation.addListener('focus', () => {
       this.checkLoggedIn();
     });
+    this.pageReload = this.props.navigation.addListener('focus',()=>{
+      this.getPost();
+      this.getUserDetails();
+    });
   
-    this.getData();
     this.getPost();
-    this.likePost();
-    this.delPost();
+    this.getUserDetails();
+    this.get_profile_image(); 
   }
-  /*
-  componentDidUpdate(){
-    this.getPost();
-  }
-  */
+  
   componentWillUnmount() {
     this.unsubscribe();
+    this.pageReload();
+    
+  }
+
+
+  unlikePost = async(postID)=>{
+    const value = await AsyncStorage.getItem('@session_token');
+    let id = await AsyncStorage.getItem("@session_id");
+      
+    return fetch(this.state.postLink+"/user/"+id+"/post/"+postID+"/like",{
+      method:"DELETE",
+      headers:{
+        'X-Authorization':  value
+      }
+    })
+    .then((response) => {
+      if(response.status === 200){
+          return response.json()
+      }else if(response.status === 401){
+          throw 'Unauthorized'
+      }else if(response.status === 403){
+        throw 'You have not liked this post'
+      }else if(response.status === 404){
+        throw 'not Found'
+      }else if(response.status === 500){
+        throw 'Server Error'
+      }else{
+          throw 'Something went wrong';
+      }
+    })
+    .catch((error) => {
+        console.log(error);
+    }) 
+
   }
 
   delPost = async(postID)=>{
@@ -47,28 +85,51 @@ class Home extends Component {
     })
     .then((response) => {
       if(response.status === 200){
-          return response.json()
+          this.getPost();
+          this.setState({
+            isLoading: false,
+          })
       }else if(response.status === 401){
           throw 'Unauthorized'
       }else if(response.status === 403){
         throw 'Forbidden'
       }else if(response.status === 404){
         throw 'Not Found'
+      }else if(response.status === 500){
+        throw 'Server Error'
       }else{
           throw 'Something went wrong';
       }
-    })
-    .then((responseJson) => {
-      console.log(responseJson)
-      this.setState({
-        isLoading: false,
-        
-      })
     }) 
     .catch((error) => {
       console.log(error);
     })
   }
+
+  get_profile_image = async() => {
+    let id = await AsyncStorage.getItem('@session_id');
+    let token = await AsyncStorage.getItem('@session_token');
+    fetch(this.state.postLink+"/user/"+id+"/photo", {
+      method: 'GET',
+      headers: {
+        'X-Authorization': token
+      }
+    })
+    .then((res) => {
+      return res.blob();
+    })
+    .then((resBlob) => {
+      let data = URL.createObjectURL(resBlob);
+      this.setState({
+        photo: data,
+        isLoading: false
+      });
+    })
+    .catch((err) => {
+      console.log("error", err)
+    });
+  }
+
 
   likePost = async(postID)=>{
     const value = await AsyncStorage.getItem('@session_token');
@@ -82,9 +143,14 @@ class Home extends Component {
     })
     .then((response) => {
       if(response.status === 200){
-          return response.json()
       }else if(response.status === 401){
           throw 'Unauthorized'
+      }else if(response.status === 403){
+        throw 'You have already liked this post'
+      }else if(response.status === 404){
+        throw 'Not Found'
+      }else if(response.status === 500){
+        throw 'Server Error'
       }else{
           throw 'Something went wrong';
       }
@@ -102,6 +168,38 @@ class Home extends Component {
 
   }
 
+  getUserDetails = async()=>{
+    let id = await AsyncStorage.getItem("@session_id");
+    const value = await AsyncStorage.getItem('@session_token');
+
+    return fetch(this.state.postLink+"/user/"+id,{
+      headers:{
+        'X-Authorization':  value
+      }
+    })
+    .then((response) => {
+      if(response.status === 200){
+          return response.json()
+      }else if(response.status === 401){
+          throw 'Unauthorized'
+      }else if(response.status === 404){
+        throw 'Not Found'
+      }else if(response.status === 500){
+        throw 'Server Error'
+      }else{
+          throw 'Something went wrong';
+      }
+    })
+    .then((responseJson) => {
+      this.setState({
+        userDetails:responseJson
+      })
+    })
+    .catch((error) => {
+        console.log(error);
+    }) 
+
+  }
 
   getPost = async()=>{
     let id = await AsyncStorage.getItem("@session_id");
@@ -118,6 +216,12 @@ class Home extends Component {
           return response.json()
       }else if(response.status === 401){
           throw 'Unauthorized'
+      }else if(response.status === 403){
+        throw 'Can only view the posts of yourself or your friends'
+      }else if(response.status === 404){
+        throw 'Not Found'
+      }else if(response.status === 500){
+        throw 'Server Error'
       }else{
           throw 'Something went wrong';
       }
@@ -132,40 +236,6 @@ class Home extends Component {
         console.log(error);
     })   
   }
-
-
-
-
-
-  getData = async () => {
-    const value = await AsyncStorage.getItem('@session_token');
-
-    return fetch(this.state.postLink+"/search", {
-          'headers': {
-            'X-Authorization':  value
-          }
-        })
-        .then((response) => {
-            if(response.status === 200){
-                return response.json()
-            }else if(response.status === 401){
-              this.props.navigation.navigate("Login");
-            }else{
-                throw 'Something went wrong';
-            }
-        })
-        .then((responseJson) => {
-          this.setState({
-            isLoading: false,
-            listData: responseJson
-          })
-        })
-        .catch((error) => {
-            console.log(error);
-        })
-  }
-
-
 
 
   checkLoggedIn = async () => {
@@ -194,50 +264,50 @@ class Home extends Component {
       );
     }else{
       return (
-        <View style={{backgroundColor:"#d0d0f7"}}>
+        <View style={{backgroundColor:"#d0d0f7", flex:1}}>
+          <ImageBackground source={SpaceBackgr} resizeMode="cover" style={styles.image}>
           <View style={styles.profileContainer}>
-
-          </View>
-          <FlatList
-                data={this.state.listData} 
-                renderItem={({item}) => (
-                    <View>
-                      <Text>{item.user_givenname} {item.user_familyname} </Text>
-                    </View>
-                )}
-                keyExtractor={(item,index) => item.user_id.toString()}
-              />
+            
+            <Avatar alt="Remy Sharp" src={
+                this.state.photo
+              } 
+              sx={{width: 100,
+                height: 100,}}
+                />
+            <Text style={{fontFamily: 'italic', fontSize:18, alignSelf:'center'}}> {this.state.userDetails.first_name}{this.state.userDetails.last_name} </Text>
   
+          </View>
+          
           <FlatList
                 data={this.state.postData}
                 renderItem={({item}) =>(
-                  <View style={styles.postContainer}>
-                    <Text> Post By  {item.author.first_name}  {item.text} 
-                      <TouchableOpacity
-                        onPress={()=>this.likePost(item.post_id)}
-                        style={styles.button}>
-                          <Text>{item.numLikes} 👍</Text>
+                  <View  >  
+                      <TouchableOpacity onPress={async()=>{
+                        await AsyncStorage.setItem('@postId', item.post_id),
+                        await AsyncStorage.setItem('@posterID', item.author.user_id),
+                        this.props.navigation.navigate("SinglePost");}}>
+                      <View style={styles.postContainer}>
+                        <Text style={{fontFamily: 'italic', fontSize:18}}> {item.author.first_name} : {item.text} </Text>  
+                      </View>
                       </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={()=>this.delPost(item.post_id)}
-                        style={styles.button}>
-                          <Text>Del ❌</Text>
-                      </TouchableOpacity>
-                    </Text>
+                      <View style={{alignSelf:'center', marginBottom:10}}>
+                        <ButtonGroup variant="contained" aria-label="outlined primary button group" >
+                          <Button onClick={()=>this.likePost(item.post_id)}> {item.numLikes}👍</Button>
+                          <Button onClick={()=>this.unlikePost(item.post_id)}>👎</Button>
+                          <Button onClick={()=>this.delPost(item.post_id)}>❌</Button>
+                        </ButtonGroup>
+                      </View>                     
                   </View>
                 )}
                 keyExtractor={(item,index) => item.post_id.toString()}
-                />
+                />    
+            </ImageBackground>
         </View>
       );
     }
     
   }
 }
-
-
-
-
 
 
 
@@ -266,16 +336,26 @@ const styles = StyleSheet.create({
   postContainer:{
     flex:1,
     padding:20,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor:'#f4f4f4',
     borderWidth:1,
-    borderRadius: 100,
+    borderRadius: 20,
+    backgroundColor: 'rgba(25,118,211,0.8)',
+    shadowColor: 'black',
+    shadowRadius:10
+  },
+  image: {
+    flex: 1,
+    justifyContent: "center"
   },
   profileContainer:{
-    height:170,
-    backgroundColor: '#babbf5',
-    borderWidth:2
+    height:110,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderWidth:2,
+    marginTop:10,
+    flexDirection:'row',
+    borderRadius:20,
+    shadowRadius:10,
+    marginBottom:10
   }
 });
 

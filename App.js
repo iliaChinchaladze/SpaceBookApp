@@ -10,20 +10,24 @@ import Home from './screens/Home';
 import CameraPage from './screens/cameraPage';
 import Post from './screens/PostPage';
 import Profile from './screens/Profile';
-
-import CameraIcon from './assets/cameraIcon.png';
-
+import UpdateProfile from './screens/UpdateProfile';
+import Friends from './screens/Friends';
+import UserProfile from './screens/UserProfile';
+import SinglePost from './screens/SinglePost';
+import UsersPostPage from './screens/UsersPostPage';
+import SinglePostOther from './screens/singlePostOther';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function HomeScreenNav(){
   return(
-      <Tab.Navigator screenOptions={{ headerShown: false }} >
-        <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="cameraPage" component={CameraPage} />
-        <Tab.Screen name="Post" component={Post} />
-        <Tab.Screen name= "Profile" component={Profile}/>
+      <Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle:{}}} >
+        <Tab.Screen name="Home" component={Home} options={{tabBarIcon:()=>(<Text style={{fontSize:25}}>🏡</Text>)}} />
+        <Tab.Screen name="Camera" component={CameraPage} options={{tabBarIcon:()=>(<Text style={{fontSize:25}}>📸</Text>)}}/>
+        <Tab.Screen name="Post" component={Post} options={{tabBarIcon:()=>(<Text style={{fontSize:25}}>📰</Text>)}}/>
+        <Tab.Screen name= "Profile" component={Profile} options={{tabBarIcon:()=>(<Text style={{fontSize:25}}>👨‍🏫</Text>)}}/>
+        <Tab.Screen name= "Friends" component={Friends} options={{tabBarIcon:()=>(<Text style={{fontSize:25}}>🤼</Text>)}}/>
       </Tab.Navigator>
   )
 }
@@ -37,6 +41,11 @@ class todo extends Component{
           <Stack.Screen name="Login" component={Login}  />
           <Stack.Screen name="signupPage" component={Signup}  />
           <Stack.Screen name="Main" component={HomeScreenNav}  />
+          <Stack.Screen name="UpdateProfile" component={UpdateProfile}  />
+          <Stack.Screen name= "UserProfile" component={UserProfile}/>
+          <Stack.Screen name = "SinglePost" component={SinglePost}/>
+          <Stack.Screen name = "UsersPostPage" component={UsersPostPage}/>
+          <Stack.Screen name = "SinglePostOther" component={SinglePostOther}/>
         </Stack.Navigator>    
       </NavigationContainer>
       </View>
