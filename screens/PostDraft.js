@@ -1,28 +1,40 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable react/prop-types */
+/* eslint-disable react/destructuring-assignment */
 import React, { Component } from 'react';
 import {
-  StyleSheet, Text, TextInput, Alert, SafeAreaView, ImageBackground, TouchableOpacity,
+  StyleSheet, Text, View, TextInput, SafeAreaView, ImageBackground, TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { View } from 'react-native-web';
 import SpaceBackgr from './logo/spacePic.JPG';
 
-class PostPage extends Component {
+class PostDraft extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      post: '',
+      postData: [],
+      draft: [],
       postLink: 'http://localhost:3333/api/1.0.0',
     };
   }
+
+  componentDidMount() {
+    this.getPost();
+  }
+
+  getPost = async () => {
+    const currentDraft = JSON.parse(await AsyncStorage.getItem('@currentDraft'));
+    this.setState({ draft: currentDraft });
+  };
 
   addPost = async () => {
     const id = await AsyncStorage.getItem('@session_id');
     const token = await AsyncStorage.getItem('@session_token');
 
     const toSend = {
-      text: this.state.post,
+      text: this.state.postData,
     };
     return fetch(`${this.state.postLink}/user/${id}/post`, {
       method: 'POST',
@@ -34,7 +46,6 @@ class PostPage extends Component {
     })
       .then((response) => {
         if (response.status === 201) {
-          Alert.alert('Post added');
           this.props.navigation.navigate('Home');
         } else if (response.status === 401) {
           throw new Error('Unauthorised');
@@ -51,50 +62,29 @@ class PostPage extends Component {
       });
   };
 
-  Draft = async () => {
-    const data = JSON.parse(await AsyncStorage.getItem('@draftPost'));
-    if (data == null) {
-      const draftPost = [{ text: this.state.post, id: 0 }];
-      await AsyncStorage.setItem('@draftPost', JSON.stringify(draftPost));
-    } else {
-      const index = data.length;
-      const draftPost2 = { text: this.state.post, id: index };
-      data.push(draftPost2);
-      await AsyncStorage.setItem('@draftPost', JSON.stringify(data));
-    }
-  };
-
   render() {
     return (
       <ImageBackground source={SpaceBackgr} resizeMode="cover" style={styles.image}>
         <SafeAreaView style={styles.SafeAreaViewStyle}>
-
           <TextInput
             style={styles.input}
             multiline="true"
-            placeholder="What's on your mind?"
-            onChangeText={(text) => { this.setState({ post: text }); }}
+            defaultValue={(this.state.draft.text)}
+            onChangeText={(text) => { this.setState({ postData: text }); }}
           />
-          <View style={{ flexDirection: 'row', marginHorizontal: 5 }}>
+          <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity
               onPress={() => { this.addPost(); }}
               style={styles.button}
             >
-              <Text>Post</Text>
+              <Text>✅</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => { this.Draft(); }}
+              onPress={() => this.props.navigation.goBack()}
               style={styles.button}
             >
-              <Text>Save Draft</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => { this.props.navigation.navigate('Drafts'); }}
-              style={styles.button}
-            >
-              <Text>Show drafts</Text>
+              <Text>🏡</Text>
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -133,9 +123,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   SafeAreaViewStyle: {
+
     alignItems: 'center',
     alignContent: 'center',
     alignSelf: 'center',
   },
 });
-export default PostPage;
+export default PostDraft;

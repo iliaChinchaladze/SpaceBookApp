@@ -1,85 +1,89 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable react/jsx-filename-extension */
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet, Text, View, TouchableOpacity,
+} from 'react-native';
 import { Camera } from 'expo-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-class CameraPage extends Component{
-  constructor(props){
+class CameraPage extends Component {
+  constructor(props) {
     super(props);
 
     this.state = {
       hasPermission: null,
       type: Camera.Constants.Type.back,
-      postLink: "http://localhost:3333/api/1.0.0",
-    }
+      postLink: 'http://localhost:3333/api/1.0.0',
+    };
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
     const { status } = await Camera.requestCameraPermissionsAsync();
-    this.setState({hasPermission: status === 'granted'});
+    this.setState({ hasPermission: status === 'granted' });
   }
 
   sendToServer = async (data) => {
     // Get these from AsyncStorage
-    let id = await AsyncStorage.getItem("@session_id");
-    let token = await AsyncStorage.getItem("@session_token");
+    const id = await AsyncStorage.getItem('@session_id');
+    const token = await AsyncStorage.getItem('@session_token');
 
-    let res = await fetch(data.base64);
-    let blob = await res.blob();
-
-    return fetch(this.state.postLink+"/user/" + id + "/photo", {
-        method: "POST",
-        headers: {
-            "Content-Type": "image/png",
-            "X-Authorization": token
-        },
-        body: blob
+    const res = await fetch(data.base64);
+    const blob = await res.blob();
+    const { postLink } = this.state;
+    return fetch(`${postLink}/user/${id}/photo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'image/png',
+        'X-Authorization': token,
+      },
+      body: blob,
     })
-    .then((response) => {
-        console.log("Picture added", response);
-    })
-    .catch((err) => {
+      .then((response) => {
+        console.log('Picture added', response);
+      })
+      .catch((err) => {
         console.log(err);
-    })
-  }
+      });
+  };
 
   takePicture = async () => {
-    if(this.camera){
-        const options = {
-            quality: 0.5, 
-            base64: true,
-            onPictureSaved: (data) => this.sendToServer(data)
-        };
-        await this.camera.takePictureAsync(options); 
-    } 
-  }
+    if (this.camera) {
+      const options = {
+        quality: 0.5,
+        base64: true,
+        onPictureSaved: (data) => this.sendToServer(data),
+      };
+      await this.camera.takePictureAsync(options);
+    }
+  };
 
-  render(){
-    if(this.state.hasPermission){
-      return(
+  render() {
+    if (this.state.hasPermission) {
+      return (
         <View style={styles.container}>
-          <Camera 
-            style={styles.camera} 
+          <Camera
+            style={styles.camera}
             type={this.state.type}
-            ref={ref => this.camera = ref}
+            ref={(ref) => this.camera = ref}
           >
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.button}
                 onPress={() => {
                   this.takePicture();
-                }}>
+                }}
+              >
                 <Text style={styles.text}> Take Photo </Text>
               </TouchableOpacity>
             </View>
           </Camera>
         </View>
       );
-    }else{
-      return(
-        <Text>No access to camera</Text>
-      );
     }
+    return (
+      <Text>No access to camera</Text>
+    );
   }
 }
 
